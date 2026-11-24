@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { ApiError } from "../api/http";
 import { fetchOhlc } from "../api/market/ohlcApi";
 import { SYMBOLS } from "../constants/symbols";
+import type { Quote } from "../types/market";
 
 export type PortfolioLoadState =
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "ready"; data: unknown };
+  | { status: "ready"; data: Quote[] };
 
 export function usePortfolioViewModel(): PortfolioLoadState {
   const [state, setState] = useState<PortfolioLoadState>({ status: "loading" });
