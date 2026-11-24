@@ -9,3 +9,5 @@ export interface Quote {
   low: Paise | null;
   volume: number | null;
 }
+
+export type QuoteMap = Record<string, Quote | undefined>;
