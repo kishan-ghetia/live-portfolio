@@ -1,34 +1,17 @@
-import { useEffect, useState } from "react";
-import { ApiError } from "../api/http";
-import { fetchOhlc } from "../api/market/ohlcApi";
-import { SYMBOLS } from "../constants/symbols";
-import type { Quote } from "../types/market";
+import { usePriceStore } from "../store/priceStore";
+import type { QuoteMap } from "../types/market";
 
 export type PortfolioLoadState =
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "ready"; data: Quote[] };
+  | { status: "ready"; data: QuoteMap };
 
 export function usePortfolioViewModel(): PortfolioLoadState {
-  const [state, setState] = useState<PortfolioLoadState>({ status: "loading" });
+  const status = usePriceStore((s) => s.status);
+  const error = usePriceStore((s) => s.error);
+  const quotes = usePriceStore((s) => s.quotes);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    fetchOhlc(SYMBOLS)
-      .then((data) => {
-        if (!cancelled) setState({ status: "ready", data });
-      })
-      .catch((error: unknown) => {
-        const message =
-          error instanceof ApiError ? `${error.kind}: ${error.message}` : "Unknown error";
-        if (!cancelled) setState({ status: "error", message });
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return state;
+  if (status === "error") return { status, message: error ?? "Something went wrong" };
+  if (status === "ready") return { status, data: quotes };
+  return { status };
 }
