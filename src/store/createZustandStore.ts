@@ -9,7 +9,7 @@ type Store<T> = T & StoreActions<T>;
 
 type StoreUpdate<T> = Partial<Store<T>> | ((state: Store<T>) => Partial<Store<T>>);
 
-export function createStore<T extends object>(initialState: T) {
+export function createZustandStore<T extends object>(initialState: T) {
   return create<Store<T>>()((set) => ({
     ...initialState,
     setState: (update) => set(update as StoreUpdate<T>),

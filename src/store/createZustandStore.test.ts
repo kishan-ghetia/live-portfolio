@@ -1,7 +1,7 @@
-import { createStore } from "./createStore";
+import { createZustandStore } from "./createZustandStore";
 
 const makeCounterStore = () =>
-  createStore({ count: 0, label: "start" });
+  createZustandStore({ count: 0, label: "start" });
 
 test("setState merges a partial update and keeps other fields", () => {
   const store = makeCounterStore();
