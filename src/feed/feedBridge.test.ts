@@ -1,7 +1,7 @@
 import { usePriceStore } from "../store/priceStore";
-import type { Quote, Tick } from "../types/market";
+import type { Quote } from "../types/market";
+import { createFakeSocket } from "../test/fakeSocket";
 import { startFeedBridge } from "./feedBridge";
-import type { PriceSocket, TickHandler } from "./priceSocket";
 
 const tcs: Quote = {
   symbol: "TCS",
@@ -14,21 +14,6 @@ const tcs: Quote = {
   seq: 0,
 };
 
-function fakeSocket() {
-  let handler: TickHandler | null = null;
-  const socket: PriceSocket = {
-    connect() {},
-    disconnect() {},
-    onTick(h) {
-      handler = h;
-      return () => {
-        handler = null;
-      };
-    },
-  };
-  return { socket, send: (tick: Tick) => handler?.(tick) };
-}
-
 beforeEach(() => {
   jest.useFakeTimers();
   usePriceStore.getState().resetState();
@@ -38,7 +23,7 @@ afterEach(() => jest.useRealTimers());
 
 // Ticks are held back and written together every 100ms, not one store update per tick.
 test("ticks are batched into one store update every 100ms", () => {
-  const { socket, send } = fakeSocket();
+  const { socket, send } = createFakeSocket();
   startFeedBridge(socket);
 
   send({ symbol: "TCS", seq: 1, ltp: 246500 });
@@ -51,7 +36,7 @@ test("ticks are batched into one store update every 100ms", () => {
 
 // After stop, ticks are no longer received or written.
 test("stop unsubscribes and stops writing", () => {
-  const { socket, send } = fakeSocket();
+  const { socket, send } = createFakeSocket();
   const stop = startFeedBridge(socket);
 
   stop();

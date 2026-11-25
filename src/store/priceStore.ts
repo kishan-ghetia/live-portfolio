@@ -4,6 +4,7 @@ import type { Quote, QuoteMap } from "../types/market";
 import { createZustandStore } from "./createZustandStore";
 
 export type LoadStatus = "loading" | "ready" | "error";
+export type FeedStatus = "live" | "paused";
 
 interface PriceState {
   quotes: QuoteMap;
@@ -11,6 +12,7 @@ interface PriceState {
   error: string | null;
   refreshing: boolean;
   refreshError: string | null;
+  feedStatus: FeedStatus;
 }
 
 export const usePriceStore = createZustandStore<PriceState>({
@@ -19,6 +21,7 @@ export const usePriceStore = createZustandStore<PriceState>({
   error: null,
   refreshing: false,
   refreshError: null,
+  feedStatus: "live",
 });
 
 function toQuoteMap(quotes: Quote[]): QuoteMap {
