@@ -1,5 +1,6 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { PausedBadge } from "../components/PausedBadge";
 import { PortfolioScreen } from "../screens/PortfolioScreen";
 import { WatchlistScreen } from "../screens/WatchlistScreen";
 import type { RootStackParamList, TabParamList } from "./types";
@@ -13,6 +14,7 @@ function Tabs() {
       screenOptions={{
         tabBarIconStyle: { display: "none" },
         tabBarLabelStyle: { fontSize: 15 },
+        headerRight: () => <PausedBadge />,
       }}
     >
       <Tab.Screen name="Portfolio" component={PortfolioScreen} />
@@ -23,7 +25,7 @@ function Tabs() {
 
 export function RootNavigator() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerRight: () => <PausedBadge /> }}>
       <Stack.Screen
         name="Tabs"
         component={Tabs}
