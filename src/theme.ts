@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useColorScheme } from "react-native";
 import {
   DarkTheme,
@@ -57,6 +58,11 @@ const darkTheme: AppTheme = { dark: true, colors: dark };
 
 export function useAppTheme(): AppTheme {
   return useColorScheme() === "dark" ? darkTheme : lightTheme;
+}
+
+export function useThemedStyles<T>(createStyles: (colors: Palette) => T): T {
+  const { colors } = useAppTheme();
+  return useMemo(() => createStyles(colors), [createStyles, colors]);
 }
 
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24 } as const;
