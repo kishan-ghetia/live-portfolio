@@ -14,6 +14,10 @@ const quote = (symbol: string, ltp: number): Quote => ({
 const quotes: QuoteMap = { TCS: quote("TCS", 246000), INFY: quote("INFY", 152000) };
 const onlyTcs: QuoteMap = { TCS: quote("TCS", 246000) };
 
+function queue(values: number[], rest: number) {
+  return () => values.shift() ?? rest;
+}
+
 function collect(getQuotes: () => QuoteMap, random?: () => number) {
   const socket = createSimulatedSocket(getQuotes, random);
   const ticks: Tick[] = [];
@@ -78,6 +82,36 @@ test("falling price sends a new low, and volume grows when it changes", () => {
   expect(ticks[0].low).toBe(ticks[0].ltp);
   expect(ticks[0].high).toBeUndefined();
   expect(ticks.map((t) => t.volume)).toEqual([600, 1200]);
+});
+
+// A late tick is an older message arriving again after newer ones.
+// Each normal tick uses 4 random numbers (late? symbol, move, volume?).
+// The 3rd interval rolls 0.01 (< 2% late chance), so tick 1 is re-sent with its old seq.
+test("a late tick re-sends an older tick with an old seq", () => {
+  const random = queue([0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.7, 0.01, 0.7], 0.7);
+  const { socket, ticks } = collect(() => onlyTcs, random);
+
+  socket.connect();
+  jest.advanceTimersByTime(150);
+
+  expect(ticks.map((t) => t.seq)).toEqual([1, 2, 1]);
+  expect(ticks[2]).toEqual(ticks[0]);
+});
+
+// After 60s of ticks the feed goes silent for 5s, then resumes.
+// This is what the "prices paused" watchdog will detect.
+test("goes silent for 5 seconds after a minute, then resumes", () => {
+  const { socket, ticks } = collect(() => onlyTcs, () => 0.7);
+
+  socket.connect();
+  jest.advanceTimersByTime(60_000);
+  expect(ticks).toHaveLength(1200);
+
+  jest.advanceTimersByTime(5_000);
+  expect(ticks).toHaveLength(1200);
+
+  jest.advanceTimersByTime(1_000);
+  expect(ticks).toHaveLength(1220);
 });
 
 // Further tests that could be added:
