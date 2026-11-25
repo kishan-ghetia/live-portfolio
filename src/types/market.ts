@@ -8,6 +8,7 @@ export interface Quote {
   high: Paise | null;
   low: Paise | null;
   volume: number | null;
+  seq: number;
 }
 
 export type QuoteMap = Record<string, Quote | undefined>;

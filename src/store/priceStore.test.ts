@@ -14,6 +14,7 @@ const tcs: Quote = {
   high: null,
   low: null,
   volume: null,
+  seq: 0,
 };
 
 beforeEach(() => {

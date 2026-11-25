@@ -26,6 +26,7 @@ test("valid row becomes a Quote in paise", () => {
       high: 117460,
       low: 115250,
       volume: 14753650,
+      seq: 0,
     },
   ]);
 });

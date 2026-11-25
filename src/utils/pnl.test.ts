@@ -10,6 +10,7 @@ const quote = (symbol: string, ltp: number, prevClose: number): Quote => ({
   high: null,
   low: null,
   volume: null,
+  seq: 0,
 });
 
 const gainer: Holding = { symbol: "GAIN", qty: 10, investedPaise: 100000 };

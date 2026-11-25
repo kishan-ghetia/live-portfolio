@@ -37,6 +37,7 @@ function toQuote(row: OhlcRow): Quote {
     high: toPaiseOrNull(row.high),
     low: toPaiseOrNull(row.low),
     volume: row.volume,
+    seq: 0,
   };
 }
 

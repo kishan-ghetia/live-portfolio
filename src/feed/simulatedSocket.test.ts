@@ -9,6 +9,7 @@ const quote = (symbol: string, ltp: number): Quote => ({
   high: null,
   low: null,
   volume: null,
+  seq: 0,
 });
 
 const quotes: QuoteMap = { TCS: quote("TCS", 246000), INFY: quote("INFY", 152000) };
