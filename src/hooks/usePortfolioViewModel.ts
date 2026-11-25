@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
+import { SYMBOLS } from "../constants/symbols";
 import { usePortfolioStore } from "../store/portfolioStore";
-import { usePriceStore } from "../store/priceStore";
+import { loadQuotes, usePriceStore } from "../store/priceStore";
 import type { PortfolioSummary } from "../types/portfolio";
 import { calcSummary } from "../utils/pnl";
 import { type SortKey, sortHoldings } from "../utils/sortHoldings";
@@ -29,7 +30,9 @@ export function usePortfolioViewModel() {
   else if (status === "ready") state = { status, symbols };
   else state = { status };
 
-  return { state, query, setQuery, sortBy, setSortBy };
+  const retry = () => loadQuotes(SYMBOLS);
+
+  return { state, query, setQuery, sortBy, setSortBy, retry };
 }
 
 export function usePortfolioSummary(): PortfolioSummary {

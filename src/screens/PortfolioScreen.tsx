@@ -1,9 +1,9 @@
 import { FlatList, type ListRenderItemInfo, StyleSheet, View } from "react-native";
 import { getStockRowLayout, StockRow } from "../components/StockRow";
 import { SummaryHeader } from "../components/SummaryHeader";
-import { AppText } from "../components/ui/AppText";
 import { AppTextInput } from "../components/ui/AppTextInput";
 import { type PillOption, Pills } from "../components/ui/Pills";
+import { StateView } from "../components/ui/StateView";
 import { usePortfolioViewModel } from "../hooks/usePortfolioViewModel";
 import { space } from "../theme";
 import type { SortKey } from "../utils/sortHoldings";
@@ -21,21 +21,15 @@ const renderHolding = ({ item }: ListRenderItemInfo<string>) => (
 );
 
 export function PortfolioScreen() {
-  const { state, query, setQuery, sortBy, setSortBy } = usePortfolioViewModel();
+  const { state, query, setQuery, sortBy, setSortBy, retry } = usePortfolioViewModel();
 
   if (state.status === "loading") {
-    return (
-      <View style={styles.centered}>
-        <AppText tone="muted">Loading prices…</AppText>
-      </View>
-    );
+    return <StateView variant="loading" message="Loading prices…" />;
   }
 
   if (state.status === "error") {
     return (
-      <View style={styles.centered}>
-        <AppText tone="loss">{state.message}</AppText>
-      </View>
+      <StateView variant="error" message={state.message} actionLabel="Retry" onAction={retry} />
     );
   }
 
@@ -60,16 +54,15 @@ export function PortfolioScreen() {
         </View>
       }
       ListEmptyComponent={
-        <AppText tone="muted" style={styles.empty}>
-          {query ? `No holdings match "${query}"` : "No holdings yet"}
-        </AppText>
+        <StateView
+          variant="empty"
+          message={query ? `No holdings match "${query}"` : "No holdings yet"}
+        />
       }
     />
   );
 }
 
 const styles = StyleSheet.create({
-  centered: { flex: 1, alignItems: "center", justifyContent: "center", padding: space.lg },
   header: { padding: space.lg, gap: space.md },
-  empty: { textAlign: "center", padding: space.xl },
 });
