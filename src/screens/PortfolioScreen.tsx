@@ -1,36 +1,30 @@
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { AppText } from "../components/ui/AppText";
 import { usePortfolioViewModel } from "../hooks/usePortfolioViewModel";
-import { useAppTheme } from "../theme";
+import { space } from "../theme";
 
 export function PortfolioScreen() {
-  const { colors } = useAppTheme();
   const state = usePortfolioViewModel();
 
   return (
-    <View style={{ flex: 1, padding: 16 }}>
-      <Text style={{ color: colors.text, fontWeight: "600", marginBottom: 8 }}>
+    <View style={styles.container}>
+      <AppText weight="semibold" style={styles.status}>
         Status: {state.status}
-      </Text>
-      {state.status === "error" && (
-        <Text style={{ color: colors.loss }}>{state.message}</Text>
-      )}
+      </AppText>
+      {state.status === "error" && <AppText tone="loss">{state.message}</AppText>}
       {state.status === "ready" && (
         <ScrollView>
-          <Text
-            style={{
-              color: colors.textMuted,
-              fontFamily: "monospace",
-              fontSize: 11,
-            }}
-          >
-            {JSON.stringify(
-              { summary: state.summary, rows: state.rows },
-              null,
-              2,
-            )}
-          </Text>
+          <AppText variant="caption" tone="muted" style={styles.json}>
+            {JSON.stringify({ summary: state.summary, rows: state.rows }, null, 2)}
+          </AppText>
         </ScrollView>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, padding: space.lg },
+  status: { marginBottom: space.sm },
+  json: { fontFamily: "monospace" },
+});
