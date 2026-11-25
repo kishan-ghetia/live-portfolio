@@ -53,3 +53,6 @@ test("stop unsubscribes and stops writing", () => {
 //
 // 2. Ticks after a flush go into the next batch
 //    - A tick arriving at 150ms is written at 200ms, not lost.
+//
+// 3. Whole live feed end to end (startLiveFeed)
+//    - With fake timers: store prices change after 1s, feedStatus turns paused at ~62s, live again at ~65s.
