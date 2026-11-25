@@ -1,6 +1,6 @@
 import type { Quote } from "../types/market";
 import type { Holding } from "../types/portfolio";
-import { calcHolding, calcSummary } from "./pnl";
+import { calcAveragePaise, calcDayChange, calcHolding, calcSummary } from "./pnl";
 
 const quote = (symbol: string, ltp: number, prevClose: number): Quote => ({
   symbol,
@@ -55,6 +55,21 @@ test("summary excludes unpriced holdings and reconciles with the rows", () => {
     unpricedSymbols: ["OLDCO"],
   });
   expect(summary.pnlPaise).toBe((gainRow?.pnlPaise ?? 0) + (lossRow?.pnlPaise ?? 0));
+});
+
+// Average is derived from total cost, never stored, so it can't drift after a buy.
+// It may be fractional paise; formatMoney rounds it only for display.
+test("average price is invested divided by quantity", () => {
+  expect(calcAveragePaise({ symbol: "X", qty: 3, investedPaise: 1000 })).toBeCloseTo(333.333, 3);
+});
+
+// Day change compares last price with yesterday's close; no quote means "--", not 0.
+test("day change is ltp minus previous close, null without a quote", () => {
+  expect(calcDayChange(quote("GAIN", 12000, 11000))).toEqual({
+    changePaise: 1000,
+    changePct: (1000 / 11000) * 100,
+  });
+  expect(calcDayChange(undefined)).toBeNull();
 });
 
 // Further tests that could be added:

@@ -1,4 +1,4 @@
-import type { Quote, QuoteMap } from "../types/market";
+import type { Paise, Quote, QuoteMap } from "../types/market";
 import type { Holding, HoldingValues, PortfolioSummary } from "../types/portfolio";
 
 function percent(part: number, whole: number): number {
@@ -18,6 +18,18 @@ export function calcHolding(holding: Holding, quote: Quote | undefined): Holding
     pnlPct: percent(pnlPaise, holding.investedPaise),
     dayChangePaise,
   };
+}
+
+export function calcAveragePaise(holding: Holding): number {
+  return holding.investedPaise / holding.qty;
+}
+
+export function calcDayChange(
+  quote: Quote | undefined,
+): { changePaise: Paise; changePct: number } | null {
+  if (!quote) return null;
+  const changePaise = quote.ltp - quote.prevClose;
+  return { changePaise, changePct: percent(changePaise, quote.prevClose) };
 }
 
 export function calcSummary(holdings: Holding[], quotes: QuoteMap): PortfolioSummary {
