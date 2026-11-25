@@ -23,7 +23,7 @@ export function applyTicks(quotes: QuoteMap, ticks: Tick[]): QuoteMap {
     const updated = applyTick(current, tick);
     if (updated === current) continue;
 
-    if (next === quotes) next = { ...quotes }; // copy the map once, on the first real change
+    if (next === quotes) next = { ...quotes };
     next[tick.symbol] = updated;
   }
   return next;
