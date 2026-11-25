@@ -34,3 +34,13 @@ export function formatPct(pct: number | null): string {
   const sign = pct < 0 ? "-" : pct > 0 ? "+" : "";
   return `${sign}${Math.abs(pct).toFixed(2)}%`;
 }
+
+export function formatChange(paise: Paise | null, pct: number | null): string {
+  if (paise === null || pct === null) return "--";
+  return `${formatMoney(paise, true)} · ${formatPct(pct)}`;
+}
+
+export function changeTone(value: number | null) {
+  if (value === null || value === 0) return "muted";
+  return value > 0 ? "gain" : "loss";
+}

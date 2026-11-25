@@ -1,4 +1,4 @@
-import { formatMoney, formatPct, toPaise } from "./money";
+import { changeTone, formatChange, formatMoney, formatPct, toPaise } from "./money";
 
 // Indian grouping: last 3 digits, then groups of 2 (lakh, crore), not groups of 3.
 // Small amounts keep their leading zero and always show 2 decimals.
@@ -35,6 +35,16 @@ test("formats percentages with sign and 2 decimals", () => {
 test("toPaise removes float noise", () => {
   expect(toPaise(1319.59)).toBe(131959);
   expect(toPaise(0.1 + 0.2)).toBe(30);
+});
+
+// P&L and day change show ₹ and % together; if either is missing the whole thing is "--".
+// Colour comes from the raw value's sign (zero or missing = grey), never from the rounded text.
+test("formats a change as ₹ and % and picks its colour from the raw sign", () => {
+  expect(formatChange(20000, 20)).toBe("+₹200.00 · +20.00%");
+  expect(formatChange(null, null)).toBe("--");
+  expect(changeTone(-0.4)).toBe("loss");
+  expect(changeTone(0)).toBe("muted");
+  expect(changeTone(null)).toBe("muted");
 });
 
 // Further tests that could be added:
