@@ -54,6 +54,32 @@ test("each tick moves price by at most 0.2% and seq increases per symbol", () =>
   });
 });
 
+// A tick only carries fields that changed.
+// random 0.7: price rises every tick, so each tick breaks the high and sends it; low and volume stay out.
+test("rising price sends a new high and nothing else extra", () => {
+  const { socket, ticks } = collect(() => onlyTcs, () => 0.7);
+
+  socket.connect();
+  jest.advanceTimersByTime(50);
+
+  expect(ticks[0].high).toBe(ticks[0].ltp);
+  expect(ticks[0].low).toBeUndefined();
+  expect(ticks[0].volume).toBeUndefined();
+});
+
+// random 0.1: price falls every tick (new low) and volume rolls under the 30% chance,
+// so each tick adds 600 shares (100 + 0.1 * 5000) and sends the running total.
+test("falling price sends a new low, and volume grows when it changes", () => {
+  const { socket, ticks } = collect(() => onlyTcs, () => 0.1);
+
+  socket.connect();
+  jest.advanceTimersByTime(100);
+
+  expect(ticks[0].low).toBe(ticks[0].ltp);
+  expect(ticks[0].high).toBeUndefined();
+  expect(ticks.map((t) => t.volume)).toEqual([600, 1200]);
+});
+
 // Further tests that could be added:
 //
 // 1. Reconnect keeps seq counting up

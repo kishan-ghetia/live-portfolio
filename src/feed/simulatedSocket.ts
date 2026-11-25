@@ -3,9 +3,13 @@ import type { PriceSocket, TickHandler } from "./priceSocket";
 
 const TICK_INTERVAL_MS = 50;
 const MAX_CHANGE_PER_TICK = 0.002;
+const VOLUME_CHANCE = 0.3;
 
 interface SymbolState {
   ltp: number;
+  high: number;
+  low: number;
+  volume: number;
   seq: number;
 }
 
@@ -22,6 +26,9 @@ export function createSimulatedSocket(
       if (!quote) continue;
       states.set(quote.symbol, {
         ltp: quote.ltp,
+        high: quote.high ?? quote.ltp,
+        low: quote.low ?? quote.ltp,
+        volume: quote.volume ?? 0,
         seq: states.get(quote.symbol)?.seq ?? 0,
       });
     }
@@ -39,7 +46,20 @@ export function createSimulatedSocket(
     state.ltp = Math.max(1, Math.round(state.ltp * (1 + move)));
     state.seq += 1;
 
-    return { symbol, seq: state.seq, ltp: state.ltp };
+    const tick: Tick = { symbol, seq: state.seq, ltp: state.ltp };
+    if (state.ltp > state.high) {
+      state.high = state.ltp;
+      tick.high = state.ltp;
+    }
+    if (state.ltp < state.low) {
+      state.low = state.ltp;
+      tick.low = state.ltp;
+    }
+    if (random() < VOLUME_CHANCE) {
+      state.volume += 100 + Math.floor(random() * 5000);
+      tick.volume = state.volume;
+    }
+    return tick;
   }
 
   function onInterval() {
