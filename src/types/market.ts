@@ -11,3 +11,12 @@ export interface Quote {
 }
 
 export type QuoteMap = Record<string, Quote | undefined>;
+
+export interface Tick {
+  symbol: string;
+  seq: number;
+  ltp?: Paise;
+  high?: Paise;
+  low?: Paise;
+  volume?: number;
+}
