@@ -1,14 +1,10 @@
 import type { ReactNode } from "react";
 import { StyleSheet, View } from "react-native";
 import { space } from "../theme";
-import type { PortfolioSummary } from "../types/portfolio";
-import { formatMoney, formatPct } from "../utils/money";
+import { usePortfolioSummary } from "../hooks/usePortfolioViewModel";
+import { changeTone, formatChange, formatMoney } from "../utils/money";
 import { AppText } from "./ui/AppText";
 import { Card } from "./ui/Card";
-
-function toneOf(value: number) {
-  return value > 0 ? "gain" : value < 0 ? "loss" : "muted";
-}
 
 function Line({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -19,7 +15,8 @@ function Line({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-export function SummaryHeader({ summary }: { summary: PortfolioSummary }) {
+export function SummaryHeader() {
+  const summary = usePortfolioSummary();
   const { valuePaise, investedPaise, pnlPaise, pnlPct, dayChangePaise, dayChangePct } = summary;
   const unpriced = summary.unpricedSymbols;
 
@@ -42,13 +39,13 @@ export function SummaryHeader({ summary }: { summary: PortfolioSummary }) {
 
       <View style={styles.lines}>
         <Line label="Total P&L">
-          <AppText tone={toneOf(pnlPaise)} tabular>
-            {formatMoney(pnlPaise, true)} · {formatPct(pnlPct)}
+          <AppText tone={changeTone(pnlPaise)} tabular>
+            {formatChange(pnlPaise, pnlPct)}
           </AppText>
         </Line>
         <Line label="Today's P&L">
-          <AppText tone={toneOf(dayChangePaise)} tabular>
-            {formatMoney(dayChangePaise, true)} · {formatPct(dayChangePct)}
+          <AppText tone={changeTone(dayChangePaise)} tabular>
+            {formatChange(dayChangePaise, dayChangePct)}
           </AppText>
         </Line>
       </View>

@@ -1,34 +1,39 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { usePortfolioStore } from "../store/portfolioStore";
 import { usePriceStore } from "../store/priceStore";
-import type { Holding, HoldingValues, PortfolioSummary } from "../types/portfolio";
-import { calcHolding, calcSummary } from "../utils/pnl";
-
-export interface PortfolioRow {
-  holding: Holding;
-  values: HoldingValues | null;
-}
+import type { PortfolioSummary } from "../types/portfolio";
+import { calcSummary } from "../utils/pnl";
+import { type SortKey, sortHoldings } from "../utils/sortHoldings";
 
 export type PortfolioLoadState =
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "ready"; rows: PortfolioRow[]; summary: PortfolioSummary };
+  | { status: "ready"; symbols: string[] };
 
-export function usePortfolioViewModel(): PortfolioLoadState {
+export function usePortfolioViewModel() {
   const holdings = usePortfolioStore((s) => s.holdings);
   const status = usePriceStore((s) => s.status);
   const error = usePriceStore((s) => s.error);
+  const [query, setQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortKey>("name");
+
+  const symbols = useMemo(() => {
+    if (status !== "ready") return [];
+    const sorted = sortHoldings(holdings, usePriceStore.getState().quotes, sortBy);
+    const search = query.trim().toUpperCase();
+    return search ? sorted.filter((symbol) => symbol.includes(search)) : sorted;
+  }, [holdings, status, sortBy, query]);
+
+  let state: PortfolioLoadState;
+  if (status === "error") state = { status, message: error ?? "Something went wrong" };
+  else if (status === "ready") state = { status, symbols };
+  else state = { status };
+
+  return { state, query, setQuery, sortBy, setSortBy };
+}
+
+export function usePortfolioSummary(): PortfolioSummary {
+  const holdings = usePortfolioStore((s) => s.holdings);
   const quotes = usePriceStore((s) => s.quotes);
-
-  const portfolio = useMemo(() => {
-    const rows = holdings.map((holding) => ({
-      holding,
-      values: calcHolding(holding, quotes[holding.symbol]),
-    }));
-    return { rows, summary: calcSummary(holdings, quotes) };
-  }, [holdings, quotes]);
-
-  if (status === "error") return { status, message: error ?? "Something went wrong" };
-  if (status === "ready") return { status, ...portfolio };
-  return { status };
+  return useMemo(() => calcSummary(holdings, quotes), [holdings, quotes]);
 }
