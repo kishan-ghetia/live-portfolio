@@ -1,4 +1,4 @@
-import type { Quote, Tick } from "../types/market";
+import type { Quote, QuoteMap, Tick } from "../types/market";
 
 export function applyTick(
   quote: Quote | undefined,
@@ -14,4 +14,17 @@ export function applyTick(
     low: tick.low ?? quote.low,
     volume: tick.volume ?? quote.volume,
   };
+}
+
+export function applyTicks(quotes: QuoteMap, ticks: Tick[]): QuoteMap {
+  let next = quotes;
+  for (const tick of ticks) {
+    const current = next[tick.symbol];
+    const updated = applyTick(current, tick);
+    if (updated === current) continue;
+
+    if (next === quotes) next = { ...quotes }; // copy the map once, on the first real change
+    next[tick.symbol] = updated;
+  }
+  return next;
 }

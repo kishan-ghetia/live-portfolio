@@ -1,5 +1,5 @@
 import type { Quote } from "../types/market";
-import { applyTick } from "./applyTick";
+import { applyTick, applyTicks } from "./applyTick";
 
 const tcs: Quote = {
   symbol: "TCS",
@@ -33,10 +33,33 @@ test("a tick for a symbol without a quote is ignored", () => {
   expect(applyTick(undefined, { symbol: "OLDCO", seq: 1, ltp: 41250 })).toBeUndefined();
 });
 
+// A batch with several ticks for the same symbol ends on the newest one.
+// The other stock in the map wasn't ticked, so it keeps the exact same object (its row won't re-render).
+test("a batch applies ticks in order and leaves untouched quotes as the same object", () => {
+  const infy: Quote = { ...tcs, symbol: "INFY", seq: 0 };
+  const quotes = { TCS: tcs, INFY: infy };
+
+  const next = applyTicks(quotes, [
+    { symbol: "TCS", seq: 6, ltp: 246500 },
+    { symbol: "TCS", seq: 7, ltp: 246800 },
+  ]);
+
+  expect(next.TCS?.ltp).toBe(246800);
+  expect(next.INFY).toBe(infy);
+});
+
+// If every tick in the batch is late, the same map comes back,
+// so the store update changes nothing and no screen re-renders.
+test("a batch of only late ticks returns the same map", () => {
+  const quotes = { TCS: tcs };
+
+  expect(applyTicks(quotes, [{ symbol: "TCS", seq: 3, ltp: 1 }])).toBe(quotes);
+});
+
 // Further tests that could be added:
 //
 // 1. high/low/volume from the tick replace the old values
 //    - { seq: 6, high: 248000, volume: 1500 } updates those and keeps ltp.
 //
-// 2. The original quote is never mutated
-//    - After a newer tick, the old object still has its old ltp and seq.
+// 2. The original quote and map are never mutated
+//    - After applying, the old objects still have their old ltp and seq.
