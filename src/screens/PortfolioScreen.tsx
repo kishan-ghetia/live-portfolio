@@ -1,4 +1,5 @@
 import { ScrollView, StyleSheet, View } from "react-native";
+import { SummaryHeader } from "../components/SummaryHeader";
 import { AppText } from "../components/ui/AppText";
 import { usePortfolioViewModel } from "../hooks/usePortfolioViewModel";
 import { space } from "../theme";
@@ -8,14 +9,13 @@ export function PortfolioScreen() {
 
   return (
     <View style={styles.container}>
-      <AppText weight="semibold" style={styles.status}>
-        Status: {state.status}
-      </AppText>
+      {state.status === "loading" && <AppText tone="muted">Loading prices…</AppText>}
       {state.status === "error" && <AppText tone="loss">{state.message}</AppText>}
       {state.status === "ready" && (
         <ScrollView>
+          <SummaryHeader summary={state.summary} />
           <AppText variant="caption" tone="muted" style={styles.json}>
-            {JSON.stringify({ summary: state.summary, rows: state.rows }, null, 2)}
+            {JSON.stringify(state.rows, null, 2)}
           </AppText>
         </ScrollView>
       )}
@@ -25,6 +25,5 @@ export function PortfolioScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: space.lg },
-  status: { marginBottom: space.sm },
-  json: { fontFamily: "monospace" },
+  json: { fontFamily: "monospace", marginTop: space.lg },
 });
