@@ -48,7 +48,9 @@ test("a row without a usable price is dropped, other rows are kept", () => {
 // open/high/low/volume are only shown, never used in P&L.
 // A bad value there becomes null (shown as "--") while the stock itself is kept.
 test("a bad display-only field becomes null without dropping the row", () => {
-  const [quote] = parseOhlcResponse(wrap([{ ...row, high: null, volume: "lots" }]));
+  const [quote] = parseOhlcResponse(
+    wrap([{ ...row, high: null, volume: "lots" }]),
+  );
 
   expect(quote.high).toBeNull();
   expect(quote.volume).toBeNull();
