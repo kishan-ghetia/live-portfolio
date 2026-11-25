@@ -18,6 +18,7 @@ export interface Palette {
   warning: string;
   primary: string;
   onPrimary: string;
+  onAccent: string;
 }
 
 export interface AppTheme {
@@ -37,6 +38,7 @@ const light: Palette = {
   warning: "#D97706",
   primary: "#111318",
   onPrimary: "#FFFFFF",
+  onAccent: "#FFFFFF",
 };
 
 const dark: Palette = {
@@ -51,6 +53,7 @@ const dark: Palette = {
   warning: "#F59E0B",
   primary: "#F2F3F5",
   onPrimary: "#0B0B0F",
+  onAccent: "#FFFFFF",
 };
 
 const lightTheme: AppTheme = { dark: false, colors: light };
