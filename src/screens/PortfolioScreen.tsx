@@ -16,8 +16,18 @@ export function PortfolioScreen() {
       )}
       {state.status === "ready" && (
         <ScrollView>
-          <Text style={{ color: colors.textMuted, fontFamily: "monospace", fontSize: 11 }}>
-            {JSON.stringify(state.data, null, 2)}
+          <Text
+            style={{
+              color: colors.textMuted,
+              fontFamily: "monospace",
+              fontSize: 11,
+            }}
+          >
+            {JSON.stringify(
+              { summary: state.summary, rows: state.rows },
+              null,
+              2,
+            )}
           </Text>
         </ScrollView>
       )}
