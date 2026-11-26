@@ -1,9 +1,148 @@
-import { Text, View } from "react-native";
+import { memo } from "react";
+import {
+  FlatList,
+  Keyboard,
+  type ListRenderItemInfo,
+  Pressable,
+  StyleSheet,
+  View,
+} from "react-native";
+import { getStockRowLayout, StockRow } from "../components/StockRow";
+import { AppText } from "../components/ui/AppText";
+import { AppTextInput } from "../components/ui/AppTextInput";
+import { StateView } from "../components/ui/StateView";
+import { useWatchlistViewModel } from "../hooks/useWatchlistViewModel";
+import { addToWatchlist, removeFromWatchlist, useWatchlistStore } from "../store/watchlistStore";
+import { type Palette, space, useThemedStyles } from "../theme";
+
+const keyBySymbol = (symbol: string) => symbol;
+
+const renderQuote = ({ item }: ListRenderItemInfo<string>) => (
+  <StockRow symbol={item} mode="quote" />
+);
+
+const renderResult = ({ item }: ListRenderItemInfo<string>) => <SearchResult symbol={item} />;
 
 export function WatchlistScreen() {
+  const { state, retry, query, setQuery, setSearchFocused, showResults, results } =
+    useWatchlistViewModel();
+
+  const cancelSearch = () => {
+    setQuery("");
+    setSearchFocused(false);
+    Keyboard.dismiss();
+  };
+
+  if (state.status === "loading") {
+    return <StateView variant="loading" message="Loading prices…" />;
+  }
+
+  if (state.status === "error") {
+    return (
+      <StateView variant="error" message={state.message} actionLabel="Retry" onAction={retry} />
+    );
+  }
+
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-      <Text>Watchlist</Text>
+    <View style={styles.screen}>
+      <AppText variant="caption" weight="semibold" tone="muted" style={styles.sectionTitle}>
+        Find stock to add
+      </AppText>
+      <View style={styles.search}>
+        <AppTextInput
+          value={query}
+          onChangeText={setQuery}
+          onFocus={() => setSearchFocused(true)}
+          onBlur={() => setSearchFocused(false)}
+          onClear={showResults ? cancelSearch : undefined}
+          placeholder="Search symbol to add…"
+          autoCapitalize="characters"
+          autoCorrect={false}
+        />
+      </View>
+      {!showResults && (
+        <AppText
+          variant="caption"
+          weight="semibold"
+          tone="muted"
+          style={[styles.sectionTitle, styles.listTitle]}
+        >
+          My watchlist · {state.symbols.length}
+        </AppText>
+      )}
+      {showResults ? (
+        <FlatList
+          data={results}
+          keyExtractor={keyBySymbol}
+          renderItem={renderResult}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.content}
+          ListEmptyComponent={
+            <StateView variant="empty" message={`No symbol matches "${query.trim()}"`} />
+          }
+        />
+      ) : (
+        <FlatList
+          data={state.symbols}
+          keyExtractor={keyBySymbol}
+          renderItem={renderQuote}
+          getItemLayout={getStockRowLayout}
+          contentContainerStyle={styles.content}
+          ListEmptyComponent={
+            <StateView
+              variant="empty"
+              message="Your watchlist is empty. Search above to add symbols."
+            />
+          }
+        />
+      )}
     </View>
   );
 }
+
+const SearchResult = memo(function SearchResult({ symbol }: { symbol: string }) {
+  const resultStyles = useThemedStyles(createResultStyles);
+  const added = useWatchlistStore((s) => s.symbols.includes(symbol));
+
+  return (
+    <Pressable
+      onPress={() => (added ? removeFromWatchlist(symbol) : addToWatchlist(symbol))}
+      accessibilityRole="button"
+      accessibilityLabel={added ? `Remove ${symbol} from watchlist` : `Add ${symbol} to watchlist`}
+      style={({ pressed }) => [resultStyles.row, pressed && resultStyles.pressed]}
+    >
+      <AppText variant="title">{symbol}</AppText>
+      <AppText variant="title" tone={added ? "gain" : "muted"}>
+        {added ? "✓" : "+"}
+      </AppText>
+    </Pressable>
+  );
+});
+
+const styles = StyleSheet.create({
+  screen: { flex: 1 },
+  search: { paddingHorizontal: space.lg },
+  sectionTitle: {
+    paddingHorizontal: space.lg,
+    paddingTop: space.lg,
+    paddingBottom: space.sm,
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  listTitle: { paddingTop: space.xl, paddingBottom: 0 },
+  content: { flexGrow: 1 },
+});
+
+const createResultStyles = (colors: Palette) =>
+  StyleSheet.create({
+    row: {
+      height: 52,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: space.lg,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
+    },
+    pressed: { opacity: 0.6 },
+  });
