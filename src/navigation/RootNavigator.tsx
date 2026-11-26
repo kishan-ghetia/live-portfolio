@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { PausedBadge } from "../components/PausedBadge";
 import { PortfolioScreen } from "../screens/PortfolioScreen";
 import { StockDetailScreen } from "../screens/StockDetailScreen";
+import { TradeSheetScreen } from "../screens/TradeSheetScreen";
 import { WatchlistScreen } from "../screens/WatchlistScreen";
 import type { RootStackParamList, TabParamList } from "./types";
 
@@ -36,6 +37,17 @@ export function RootNavigator() {
         name="StockDetail"
         component={StockDetailScreen}
         options={({ route }) => ({ title: route.params.symbol })}
+      />
+      <Stack.Screen
+        name="TradeSheet"
+        component={TradeSheetScreen}
+        options={{
+          presentation: "formSheet",
+          sheetAllowedDetents: "fitToContents",
+          sheetGrabberVisible: true,
+          sheetCornerRadius: 20,
+          headerShown: false,
+        }}
       />
     </Stack.Navigator>
   );
