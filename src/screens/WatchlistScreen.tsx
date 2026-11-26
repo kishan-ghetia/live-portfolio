@@ -7,6 +7,7 @@ import {
   StyleSheet,
   View,
 } from "react-native";
+import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { getStockRowLayout, StockRow } from "../components/StockRow";
 import { AppText } from "../components/ui/AppText";
 import { AppTextInput } from "../components/ui/AppTextInput";
@@ -17,9 +18,7 @@ import { type Palette, space, useThemedStyles } from "../theme";
 
 const keyBySymbol = (symbol: string) => symbol;
 
-const renderQuote = ({ item }: ListRenderItemInfo<string>) => (
-  <StockRow symbol={item} mode="quote" />
-);
+const renderQuote = ({ item }: ListRenderItemInfo<string>) => <SwipeableQuote symbol={item} />;
 
 const renderResult = ({ item }: ListRenderItemInfo<string>) => <SearchResult symbol={item} />;
 
@@ -100,6 +99,33 @@ export function WatchlistScreen() {
   );
 }
 
+const SwipeableQuote = memo(function SwipeableQuote({ symbol }: { symbol: string }) {
+  const rowStyles = useThemedStyles(createRowStyles);
+
+  return (
+    <ReanimatedSwipeable
+      friction={2}
+      rightThreshold={40}
+      overshootRight={false}
+      childrenContainerStyle={rowStyles.front}
+      renderRightActions={() => (
+        <Pressable
+          onPress={() => removeFromWatchlist(symbol)}
+          accessibilityRole="button"
+          accessibilityLabel={`Remove ${symbol} from watchlist`}
+          style={rowStyles.remove}
+        >
+          <AppText weight="semibold" style={rowStyles.removeLabel}>
+            Remove
+          </AppText>
+        </Pressable>
+      )}
+    >
+      <StockRow symbol={symbol} mode="quote" />
+    </ReanimatedSwipeable>
+  );
+});
+
 const SearchResult = memo(function SearchResult({ symbol }: { symbol: string }) {
   const resultStyles = useThemedStyles(createResultStyles);
   const added = useWatchlistStore((s) => s.symbols.includes(symbol));
@@ -132,6 +158,18 @@ const styles = StyleSheet.create({
   listTitle: { paddingTop: space.xl, paddingBottom: 0 },
   content: { flexGrow: 1 },
 });
+
+const createRowStyles = (colors: Palette) =>
+  StyleSheet.create({
+    front: { backgroundColor: colors.background },
+    remove: {
+      width: 96,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.loss,
+    },
+    removeLabel: { color: colors.onAccent },
+  });
 
 const createResultStyles = (colors: Palette) =>
   StyleSheet.create({
