@@ -139,6 +139,9 @@ OLDCO is never returned by the API, so it has no quote.
 - **An empty API response** (zero valid rows) currently shows a ready screen full of `--`. It should show the error state with Retry.
 - **Holdings persistence and realised P&L tracking** after a sell.
 - **A shared `StockList` component.** Portfolio and Watchlist each set up `FlatList` on their own (key extractor, `getItemLayout`, empty state). With a third list, I'd pull that common setup into one component.
+- **Better charting library** for interactive charts, candles and time ranges.
+- **UI/UX polish:** price flash on change, clearer gain/loss visuals and smoother transitions. In a trading app, how fast and clearly a price change reads matters as much as the number.
+- **Code quality:** more tests around the screens and the feed end to end, and tidy up the remaining small duplication.
 
 ## Time spent
 
