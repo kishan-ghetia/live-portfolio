@@ -14,15 +14,16 @@ export default function App() {
   const theme = useAppTheme();
   const { dark, light } = navigationThemes;
   const status = usePriceStore((s) => s.status);
+  const refreshing = usePriceStore((s) => s.refreshing);
 
   useEffect(() => {
     loadQuotes(SYMBOLS);
   }, []);
 
   useEffect(() => {
-    if (status !== "ready") return;
+    if (status !== "ready" || refreshing) return;
     return startLiveFeed();
-  }, [status]);
+  }, [status, refreshing]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

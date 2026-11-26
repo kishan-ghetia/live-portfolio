@@ -38,7 +38,7 @@ export function createSimulatedSocket(
         high: quote.high ?? quote.ltp,
         low: quote.low ?? quote.ltp,
         volume: quote.volume ?? 0,
-        seq: states.get(quote.symbol)?.seq ?? 0,
+        seq: states.get(quote.symbol)?.seq ?? quote.seq,
       });
     }
   }
