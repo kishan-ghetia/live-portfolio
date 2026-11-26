@@ -16,7 +16,7 @@ import { calcAveragePaise, calcDayChange, calcHolding } from "../utils/pnl";
 
 type Props = NativeStackScreenProps<RootStackParamList, "StockDetail">;
 
-export function StockDetailScreen({ route }: Props) {
+export function StockDetailScreen({ route, navigation }: Props) {
   const { symbol } = route.params;
   const { holding, canBuy, canSell } = useStockDetailViewModel(symbol);
   const insets = useSafeAreaInsets();
@@ -37,14 +37,14 @@ export function StockDetailScreen({ route }: Props) {
             label="Buy"
             variant="buy"
             disabled={!canBuy}
-            onPress={() => {}}
+            onPress={() => navigation.navigate("TradeSheet", { symbol, side: "buy" })}
             style={styles.action}
           />
           <AppButton
             label="Sell"
             variant="sell"
             disabled={!canSell}
-            onPress={() => {}}
+            onPress={() => navigation.navigate("TradeSheet", { symbol, side: "sell" })}
             style={styles.action}
           />
         </View>
