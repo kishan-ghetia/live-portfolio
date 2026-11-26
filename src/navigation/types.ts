@@ -7,6 +7,7 @@ export type TabParamList = {
 
 export type RootStackParamList = {
   Tabs: NavigatorScreenParams<TabParamList>;
+  StockDetail: { symbol: string };
 };
 
 declare global {

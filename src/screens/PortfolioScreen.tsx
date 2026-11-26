@@ -1,3 +1,5 @@
+import { useNavigation } from "@react-navigation/native";
+import { useCallback } from "react";
 import {
   FlatList,
   type ListRenderItemInfo,
@@ -23,12 +25,9 @@ const SORT_OPTIONS: PillOption<SortKey>[] = [
 
 const keyBySymbol = (symbol: string) => symbol;
 
-const renderHolding = ({ item }: ListRenderItemInfo<string>) => (
-  <StockRow symbol={item} mode="holding" />
-);
-
 export function PortfolioScreen() {
   const { colors } = useAppTheme();
+  const navigation = useNavigation();
   const {
     state,
     query,
@@ -40,6 +39,18 @@ export function PortfolioScreen() {
     refreshError,
     refresh,
   } = usePortfolioViewModel();
+
+  const openDetail = useCallback(
+    (symbol: string) => navigation.navigate("StockDetail", { symbol }),
+    [navigation],
+  );
+
+  const renderHolding = useCallback(
+    ({ item }: ListRenderItemInfo<string>) => (
+      <StockRow symbol={item} mode="holding" onPress={openDetail} />
+    ),
+    [openDetail],
+  );
 
   if (state.status === "loading") {
     return <StateView variant="loading" message="Loading prices…" />;

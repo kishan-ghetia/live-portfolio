@@ -1,4 +1,5 @@
-import { memo } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { memo, useCallback } from "react";
 import {
   FlatList,
   Keyboard,
@@ -18,13 +19,24 @@ import { type Palette, space, useThemedStyles } from "../theme";
 
 const keyBySymbol = (symbol: string) => symbol;
 
-const renderQuote = ({ item }: ListRenderItemInfo<string>) => <SwipeableQuote symbol={item} />;
-
 const renderResult = ({ item }: ListRenderItemInfo<string>) => <SearchResult symbol={item} />;
 
 export function WatchlistScreen() {
+  const navigation = useNavigation();
   const { state, retry, query, setQuery, setSearchFocused, showResults, results } =
     useWatchlistViewModel();
+
+  const openDetail = useCallback(
+    (symbol: string) => navigation.navigate("StockDetail", { symbol }),
+    [navigation],
+  );
+
+  const renderQuote = useCallback(
+    ({ item }: ListRenderItemInfo<string>) => (
+      <SwipeableQuote symbol={item} onPress={openDetail} />
+    ),
+    [openDetail],
+  );
 
   const cancelSearch = () => {
     setQuery("");
@@ -99,7 +111,12 @@ export function WatchlistScreen() {
   );
 }
 
-const SwipeableQuote = memo(function SwipeableQuote({ symbol }: { symbol: string }) {
+interface SwipeableQuoteProps {
+  symbol: string;
+  onPress: (symbol: string) => void;
+}
+
+const SwipeableQuote = memo(function SwipeableQuote({ symbol, onPress }: SwipeableQuoteProps) {
   const rowStyles = useThemedStyles(createRowStyles);
 
   return (
@@ -121,7 +138,7 @@ const SwipeableQuote = memo(function SwipeableQuote({ symbol }: { symbol: string
         </Pressable>
       )}
     >
-      <StockRow symbol={symbol} mode="quote" />
+      <StockRow symbol={symbol} mode="quote" onPress={onPress} />
     </ReanimatedSwipeable>
   );
 });
