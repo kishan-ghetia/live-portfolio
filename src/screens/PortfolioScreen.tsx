@@ -1,11 +1,18 @@
-import { FlatList, type ListRenderItemInfo, StyleSheet, View } from "react-native";
+import {
+  FlatList,
+  type ListRenderItemInfo,
+  RefreshControl,
+  StyleSheet,
+  View,
+} from "react-native";
 import { getStockRowLayout, StockRow } from "../components/StockRow";
 import { SummaryHeader } from "../components/SummaryHeader";
+import { AppText } from "../components/ui/AppText";
 import { AppTextInput } from "../components/ui/AppTextInput";
 import { type PillOption, Pills } from "../components/ui/Pills";
 import { StateView } from "../components/ui/StateView";
 import { usePortfolioViewModel } from "../hooks/usePortfolioViewModel";
-import { space } from "../theme";
+import { space, useAppTheme } from "../theme";
 import type { SortKey } from "../utils/sortHoldings";
 
 const SORT_OPTIONS: PillOption<SortKey>[] = [
@@ -21,7 +28,18 @@ const renderHolding = ({ item }: ListRenderItemInfo<string>) => (
 );
 
 export function PortfolioScreen() {
-  const { state, query, setQuery, sortBy, setSortBy, retry } = usePortfolioViewModel();
+  const { colors } = useAppTheme();
+  const {
+    state,
+    query,
+    setQuery,
+    sortBy,
+    setSortBy,
+    retry,
+    refreshing,
+    refreshError,
+    refresh,
+  } = usePortfolioViewModel();
 
   if (state.status === "loading") {
     return <StateView variant="loading" message="Loading prices…" />;
@@ -40,8 +58,22 @@ export function PortfolioScreen() {
       renderItem={renderHolding}
       getItemLayout={getStockRowLayout}
       keyboardShouldPersistTaps="handled"
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={refresh}
+          tintColor={colors.textMuted}
+          colors={[colors.primary]}
+          progressBackgroundColor={colors.surface}
+        />
+      }
       ListHeaderComponent={
         <View style={styles.header}>
+          {refreshError && (
+            <AppText variant="caption" tone="loss">
+              Couldn't refresh: {refreshError}. Showing last prices.
+            </AppText>
+          )}
           <SummaryHeader />
           <AppTextInput
             value={query}

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { SYMBOLS } from "../constants/symbols";
 import { usePortfolioStore } from "../store/portfolioStore";
-import { loadQuotes, usePriceStore } from "../store/priceStore";
+import { loadQuotes, refreshQuotes, usePriceStore } from "../store/priceStore";
 import type { PortfolioSummary } from "../types/portfolio";
 import { calcSummary } from "../utils/pnl";
 import { type SortKey, sortHoldings } from "../utils/sortHoldings";
@@ -15,6 +15,8 @@ export function usePortfolioViewModel() {
   const holdings = usePortfolioStore((s) => s.holdings);
   const status = usePriceStore((s) => s.status);
   const error = usePriceStore((s) => s.error);
+  const refreshing = usePriceStore((s) => s.refreshing);
+  const refreshError = usePriceStore((s) => s.refreshError);
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortKey>("name");
 
@@ -23,7 +25,7 @@ export function usePortfolioViewModel() {
     const sorted = sortHoldings(holdings, usePriceStore.getState().quotes, sortBy);
     const search = query.trim().toUpperCase();
     return search ? sorted.filter((symbol) => symbol.includes(search)) : sorted;
-  }, [holdings, status, sortBy, query]);
+  }, [holdings, status, refreshing, sortBy, query]);
 
   let state: PortfolioLoadState;
   if (status === "error") state = { status, message: error ?? "Something went wrong" };
@@ -31,8 +33,19 @@ export function usePortfolioViewModel() {
   else state = { status };
 
   const retry = () => loadQuotes(SYMBOLS);
+  const refresh = () => refreshQuotes(SYMBOLS);
 
-  return { state, query, setQuery, sortBy, setSortBy, retry };
+  return {
+    state,
+    query,
+    setQuery,
+    sortBy,
+    setSortBy,
+    retry,
+    refreshing,
+    refreshError,
+    refresh,
+  };
 }
 
 export function usePortfolioSummary(): PortfolioSummary {
