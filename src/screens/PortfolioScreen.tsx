@@ -78,6 +78,7 @@ export function PortfolioScreen() {
           <AppTextInput
             value={query}
             onChangeText={setQuery}
+            onClear={query ? () => setQuery("") : undefined}
             placeholder="Search symbol…"
             autoCapitalize="characters"
             autoCorrect={false}

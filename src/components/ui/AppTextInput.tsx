@@ -1,12 +1,34 @@
-import { StyleSheet, TextInput, type TextInputProps } from "react-native";
+import { Pressable, StyleSheet, TextInput, type TextInputProps, View } from "react-native";
 import { font, type Palette, radius, space, useAppTheme, useThemedStyles } from "../../theme";
+import { AppText } from "./AppText";
 
-export function AppTextInput({ style, ...rest }: TextInputProps) {
+interface AppTextInputProps extends TextInputProps {
+  onClear?: () => void;
+}
+
+export function AppTextInput({ style, onClear, ...rest }: AppTextInputProps) {
   const styles = useThemedStyles(createStyles);
   const { colors } = useAppTheme();
 
   return (
-    <TextInput placeholderTextColor={colors.textMuted} style={[styles.input, style]} {...rest} />
+    <View>
+      <TextInput
+        placeholderTextColor={colors.textMuted}
+        style={[styles.input, onClear && styles.inputWithClear, style]}
+        {...rest}
+      />
+      {onClear && (
+        <Pressable
+          onPress={onClear}
+          hitSlop={space.sm}
+          accessibilityRole="button"
+          accessibilityLabel="Clear"
+          style={styles.clear}
+        >
+          <AppText tone="muted">✕</AppText>
+        </Pressable>
+      )}
+    </View>
   );
 }
 
@@ -19,5 +41,15 @@ const createStyles = (colors: Palette) =>
       backgroundColor: colors.chip,
       color: colors.text,
       fontSize: font.md,
+    },
+    inputWithClear: { paddingRight: 44 },
+    clear: {
+      position: "absolute",
+      right: 0,
+      top: 0,
+      bottom: 0,
+      width: 44,
+      alignItems: "center",
+      justifyContent: "center",
     },
   });
