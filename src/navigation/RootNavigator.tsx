@@ -17,6 +17,7 @@ function Tabs() {
         tabBarIconStyle: { display: "none" },
         tabBarLabelStyle: { fontSize: 15 },
         headerRight: () => <PausedBadge />,
+        freezeOnBlur: true,
       }}
     >
       <Tab.Screen name="Portfolio" component={PortfolioScreen} />
@@ -27,7 +28,7 @@ function Tabs() {
 
 export function RootNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerRight: () => <PausedBadge /> }}>
+    <Stack.Navigator screenOptions={{ headerRight: () => <PausedBadge />, freezeOnBlur: true }}>
       <Stack.Screen
         name="Tabs"
         component={Tabs}
