@@ -1,4 +1,11 @@
-import { changeTone, formatChange, formatMoney, formatPct, toPaise } from "./money";
+import {
+  changeTone,
+  formatChange,
+  formatMoney,
+  formatPct,
+  formatVolume,
+  toPaise,
+} from "./money";
 
 // Indian grouping: last 3 digits, then groups of 2 (lakh, crore), not groups of 3.
 // Small amounts keep their leading zero and always show 2 decimals.
@@ -45,6 +52,13 @@ test("formats a change as ₹ and % and picks its colour from the raw sign", () 
   expect(changeTone(-0.4)).toBe("loss");
   expect(changeTone(0)).toBe("muted");
   expect(changeTone(null)).toBe("muted");
+});
+
+// Volume is a share count, not money: Indian grouping, no ₹, no decimals, "--" when missing.
+test("formats volume with Indian grouping", () => {
+  expect(formatVolume(14753650)).toBe("1,47,53,650");
+  expect(formatVolume(999)).toBe("999");
+  expect(formatVolume(null)).toBe("--");
 });
 
 // Further tests that could be added:

@@ -28,6 +28,11 @@ export function formatMoney(paise: Paise | null, showPlus = false): string {
   return `${sign}₹${rupees}.${decimals}`;
 }
 
+export function formatVolume(volume: number | null): string {
+  if (volume === null) return "--";
+  return groupIndian(String(Math.round(volume)));
+}
+
 export function formatPct(pct: number | null): string {
   if (pct === null) return "--";
 
